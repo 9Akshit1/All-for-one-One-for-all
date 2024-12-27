@@ -1,52 +1,44 @@
 Education:
-Master of Software Engineering , Seattle University 
-      Bachelor of Science with high honors, University of Connecticut
+Merivale High School
 
 Skills:
-AI/ML Senior Level Experience
+Main Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java
+Experience in AI/ML, Arduino, Game Development, Web Development, Data Analytics
+Soft Skills: Leadership, Time Management, Communication, Debugging, Analytical skills
 
 Awards & Accomplishments:
-GIA Hackathon Winner
+Hack 49 Hackathon 3rd Place Winner using Surge Stitch Project (2024)
+GIA Hacks 2 Hackathon 4th Place Winner using EduPiano Project (2024)
+Ontario Silver Medal for Exemplary Academic Display of Achieving a +90% Average (2024)
+Ottawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)
+Fryer UWaterloo Competition National Rank 104 (2024)
+Canadian Computing Competition Junior Distinction (2024)
+Canadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)
+Ottawa Regional Science Fair ASHRAE Special Award Winner (2023)
+Obotz Olympiad National 1st Rank (2020)
 
 Certifications & Licenses:
-Certified Java Programmer, University of Washington, 2006
-      IBM Certified Solutions Expert DB2 Database Administration, 2003
+Graduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner
+Earned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates
 
 Volunteer & Work Experience:
-King County Information Technology, Seattle, WA
-Senior Software Developer, Oct 2007 � Oct 2013 
+Founder & President, Ottawa ACES Business Chapter - August 2024  - PRESENT
+        Increased social media presence by regularly updating Instagram and posting. Set up events & lessons. 
+        Brought in guest speakers & teachers. Working on bringing sponsors and developing a startup business.
+        Reference: ACES | advancedcurriculums.official@gmail.com  
 
-* Develop and direct software system testing and validation procedures, programming, and documentation.
-* Consult with customers about software system design and maintenance.
-* Work closely with King County Metro administrators to extract and format data for the automated announcement of stops on county bus routes, and developed the back end of an online tool to manage the bus announcements.
-* Worked with a front-end developer to build a Stop Sign Management Tool for maintenance and management of bus stop signage throughout King County. This involved creation of an online user interface and Oracle stored procedures to extract data from the Oracle database.
+        Web developer, Fresh Future Foundation - August 2024  - PRESENT
+        Leveraged React.js, Node.js, HTML, and CSS, to revamp the frontend of organization’s website
+        Increased social media presence by regularly updating Instagram and posting. Made connections.
+        Set up events and ideas for the organization. From hackathons to coding/robotics projects. 
+        Reference: Arya Vaidhya  | aryav663@gmail.com  
 
-�
-Expeditors International of Washington, Seattle, WA
-Development Supervisor and Senior Software Developer, Mar 2004 � Sep 2007 
+        Engineer, Sparkling H20 Youth Robotics - July 2024  - PRESENT
+        Part of the software team. Used Java to develop subsystems and commands to control the FIRST competition robots. Participated in competitions for testing and calibrating robots. 
+        Worked with the mechanical and outreach team to develop strategies, plan, and build the robot.
+        Reference: Spark Youth Robotics Club  | spark.youthrc@gmail.com  
 
-Lead team of 5 developers responsible for enhancement and support of an online global logistics system providing data service 24 x 7 to employees, customers and other automated systems around the world, servicing ~3000 requests per hour.
-
-* Front end of this system was Java/Apache/Tomcat/JSP, data service was Visual Age, Smalltalk/SOAP/XML.
-* Worked closely with cross-functional team of business analysts, product owner and quality assurance personnel to maintain an aggressive release schedule of additions to business functionality, such as providing online access to scanned documents and email notifications to clients when critical events occurred.
-* Developed support procedures, mentored new employees and set up on call rotation to provide 24 x 7 support. Designed and made improvements to the system, such as automatic database failover, to make it robust and minimize after hours calls.
-* Acted as consultant to data warehouse team creatig new DB2 database for the system, consisting of both a normalized transactional tier and a datamart tier. Consulting involved assessing how well the new design modeled actual business objects and supported most frequent requests.
-
-
-
-
-
-Clark County School District, Las Vegas, NV
-Senior Database Analyst, Sep 2001 � Mar 2004 
-
-One of two DBAs supporting all district-wide administration systems for one of the largest school districts in the US (260,000 students in 300 schools), in DB2 on an IBM mainframe, and a third-party student application running on DB2 v7 for Windows 2000 and Windows NT.
-
-* Designed, created, modified tables, scheduled backups, monitored space allocation, reorganized tables and indexes as needed and shared after-hours on call support.
-* Assisted developers, several of whom were long-tie COBOL programmers, in using database concepts. Taught biweekly staff development classes on topics such as use of triggers, stored procedures and user-defined functions. For two years, wrote a monthly newsletter of DB2 and SQL tips.
-* Improved program performance by analyzing SQL access paths, tuning statements, and creating/modifying indexes. Successfully cut down runtimes for both online and batch programs. For example, one batch program that ran every night was cut from more than an hour to less than 5 minutes.
-* Taught classes to members of the user community in use of an SQL query tool for ad hoc access to data only available on the mainframe. Created a few variations of the class, using data the attendees worked with in their jobs, and got feedback that it was much easier to understand than the class put on by the vendor. There was always a waiting list for the classes and they were followed by a reduction in resource-consuming queries.
-
-
-
-
-
+        Embedded C & Arduino Assistant Teacher, OBotz Robotics - June 2023 - March 2024
+        Lead lessons at OBotz Robotics, teaching students about microcontrollers, mechanical and electronic components, Arduino programming, and embedded C through interactive methods.
+        Incorporated real-world examples and hands-on projects into the curriculum, enabling students to apply theoretical knowledge to practical tasks and problem-solving scenarios.
+        Reference: Cyrilkumar Jithuri  | cyril@ucmasottawa.ca | (613) 404-5572

@@ -16,6 +16,6 @@ def run(job_file, resume_file):
     """
     ro = r_o.ResumeOptimizer(job_file, resume_file)
     
-    return [str(ro.similarity), ro.optimize_skills(), ro.list_similar_skills('design patterns', number_to_return=5), ro.optimize_acronyms(), ro.optimize_action_words()]
+    return ["Similarity Score: " + str(ro.similarity) + "\n", ro.optimize_skills(), ro.list_similar_skills('design patterns', number_to_return=5), ro.optimize_acronyms(), ro.optimize_action_words()]
 
 #run('resume_optimizer/data/jobs/web_and_db_developer.txt', 'resume_optimizer/data/resumes/pjb_resume.txt')
