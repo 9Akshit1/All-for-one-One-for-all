@@ -28,23 +28,7 @@ from PyQt6.QtWidgets import (
 
 from competition_finder.competition_finder import find_competitions
 from resume_optimizer.output import run  
-
-# Define a dark theme color palette
-def apply_dark_theme(app):
-    dark_palette = app.palette()
-    dark_palette.setColor(dark_palette.ColorRole.Window, Qt.GlobalColor.black)
-    dark_palette.setColor(dark_palette.ColorRole.WindowText, Qt.GlobalColor.white)
-    dark_palette.setColor(dark_palette.ColorRole.Base, Qt.GlobalColor.darkGray)
-    dark_palette.setColor(dark_palette.ColorRole.AlternateBase, Qt.GlobalColor.black)
-    dark_palette.setColor(dark_palette.ColorRole.ToolTipBase, Qt.GlobalColor.white)
-    dark_palette.setColor(dark_palette.ColorRole.ToolTipText, Qt.GlobalColor.white)
-    dark_palette.setColor(dark_palette.ColorRole.Text, Qt.GlobalColor.white)
-    dark_palette.setColor(dark_palette.ColorRole.Button, Qt.GlobalColor.darkGray)
-    dark_palette.setColor(dark_palette.ColorRole.ButtonText, Qt.GlobalColor.white)
-    dark_palette.setColor(dark_palette.ColorRole.BrightText, Qt.GlobalColor.red)
-    dark_palette.setColor(dark_palette.ColorRole.Highlight, Qt.GlobalColor.darkCyan)
-    dark_palette.setColor(dark_palette.ColorRole.HighlightedText, Qt.GlobalColor.black)
-    app.setPalette(dark_palette)
+from application_writer.extract import extract_and_generate 
 
 # Main Application Class
 class MainApp(QMainWindow):
@@ -186,7 +170,7 @@ class MainApp(QMainWindow):
         self.application_writer_window = ApplicationWriter(self.geometry().getRect())
         self.application_writer_window.show()
 
-# Question Slider Window Class for Input Taking
+# Question Slider Window Class for Input Taking Windows
 class QuestionSlider(QWidget):
     def __init__(self, input_questions, submit_callback, parent=None):
         super().__init__(parent)
@@ -263,7 +247,7 @@ class QuestionSlider(QWidget):
 
         # Iterate through the input questions to create individual pages
         self.input_fields = []
-        for question, input_type in self.input_questions:
+        for question, input_type, *options in self.input_questions:
             question_page = QWidget()
             question_layout = QVBoxLayout()
             question_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center-align the layout
@@ -305,7 +289,7 @@ class QuestionSlider(QWidget):
                 input_field.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             elif input_type == "combobox":
                 input_field = QComboBox()
-                input_field.addItems(["High School", "Middle School", "University/College"])
+                input_field.addItems(options[0])
                 input_field.setFixedHeight(30)  # Match height with other input types
                 input_field.setStyleSheet("""
                     border: none;
@@ -314,6 +298,83 @@ class QuestionSlider(QWidget):
                     color: #FF532B;
                     padding: 5px;
                 """)
+            elif input_type == "file":
+                # Create a widget for the file upload field
+                file_upload_container = QWidget()
+                file_upload_layout = QVBoxLayout()
+                file_upload_container.setLayout(file_upload_layout)
+
+                # File name label (to display the selected file's name)
+                file_name_label = QLabel("No file selected")
+                file_name_label.setStyleSheet("""
+                    font-family: 'Arial';
+                    font-size: 14px;
+                    color: #555555;
+                    padding: 5px;
+                """)
+                file_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+                # File upload button
+                file_upload_button = QPushButton("Upload File")
+                file_upload_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #008CBA;
+                        color: white;
+                        border-radius: 10px;
+                        padding: 10px;
+                    }
+                    QPushButton:hover {
+                        background-color: #005F75;
+                    }
+                """)
+
+                # Preview label for the uploaded file
+                file_preview_label = QLabel()
+                file_preview_label.setFixedHeight(100)
+                file_preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+                # Store file path
+                file_path = ""
+
+                # Ensure 'user_files' directory exists
+                if not os.path.exists("user_files"):
+                    os.makedirs("user_files")
+
+                def handle_file_upload():
+                    nonlocal file_path
+                    file_path, _ = QFileDialog.getOpenFileName(self, "Upload File", "", "All Files (*.*);;PDF Files (*.pdf);;Images (*.png *.jpg)")
+                    if file_path:
+                        # Update file name label
+                        file_name_label.setText(os.path.basename(file_path))
+
+                        # Attempt to preview the file if it's an image
+                        image_reader = QImageReader(file_path)
+                        if image_reader.canRead():
+                            image = image_reader.read()
+                            pixmap = QPixmap.fromImage(image)
+                            file_preview_label.setPixmap(pixmap.scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio))
+
+                        # Save the file to the user_files directory
+                        try:
+                            destination_path = os.path.join("user_files", os.path.basename(file_path))
+                            with open(file_path, "rb") as source_file:
+                                with open(destination_path, "wb") as dest_file:
+                                    dest_file.write(source_file.read())
+                            print(f"File successfully uploaded to: {destination_path}")
+                        except Exception as e:
+                            print(f"Error saving file: {e}")
+
+                # Connect button click to the file upload handler
+                file_upload_button.clicked.connect(handle_file_upload)
+
+                # Add components to layout
+                file_upload_layout.addWidget(file_name_label)
+                file_upload_layout.addWidget(file_upload_button)
+                file_upload_layout.addWidget(file_preview_label)
+
+                # Add file upload container to the input fields
+                input_field = file_upload_container
+
 
             self.input_fields.append(input_field)
             question_layout.addWidget(input_field, alignment=Qt.AlignmentFlag.AlignVCenter)
@@ -413,18 +474,23 @@ class QuestionSlider(QWidget):
     def submit_answers(self):
         # Collect all answers
         answers = {}
-        for idx, (question, input_type) in enumerate(self.input_questions):
+        for idx, (question, input_type, *options) in enumerate(self.input_questions):
             if input_type == "text":
                 answers[question] = self.input_fields[idx].text()
             elif input_type == "textarea":
                 answers[question] = self.input_fields[idx].toPlainText()
             elif input_type == "combobox":
                 answers[question] = self.input_fields[idx].currentText()
+            elif input_type == "file":
+                # Get the file path or file name
+                file_upload_container = self.input_fields[idx]
+                file_name_label = file_upload_container.findChild(QLabel)
+                answers[question] = "user_files/" + file_name_label.text()  # File name text stored in the label
 
         # Call the provided callback function with the answers
         self.submit_callback(answers)
 
-# Class for each profile widget
+# Class for each profile widget for ProfileComparator
 class ProfileWidget(QWidget):
     def __init__(self, rank, profile, score, similar_items, different_items, expand_callback, collapse_callback):
         super().__init__()
@@ -571,126 +637,117 @@ class ProfileComparator(QWidget):
         # Example dataset of profiles
         self.dataset = [
             {
-                "school": "XYZ High School",
-                "age": "17",
-                "awards": "National Merit Scholar, State Science Fair Runner-Up",
-                "work_experience": "Web developer, Fresh Future Foundation                                                                                 August 2024  - PRESENT\nLeveraged React.js, Node.js, HTML, and CSS, to revamp the frontend of organization’s website\nIncreased social media presence by regularly updating Instagram and posting. Made connections.\nSet up events and ideas for the organization. From hackathons to coding/robotics projects.\nReference: Arya Vaidhya  | aryav663@gmail.com\n\nEmbedded C & Arduino Assistant Teacher, OBotz Robotics 			        June 2023 - March 2024\nLead lessons at OBotz Robotics, teaching students about microcontrollers, mechanical and electronic components, Arduino programming, and embedded C through interactive methods\nIncorporated real-world examples and hands-on projects into the curriculum, enabling students to apply theoretical knowledge to practical tasks and problem-solving scenarios\nReference: Cyrilkumar Jithuri  | cyril@ucmasottawa.ca  | (613) 404-5572",
-                "certifications": "AP Scholar with Distinction, Certified Lifeguard",
-                "projects": "Developed a Mobile App for Homework Tracking \n\nResearch on Renewable Energy Sources",
-                "skills": "C++ Programming, Public Speaking, Team Leadership",
-                "interests": "Environmental Science, Software Development",
+                "school": "Ridgemont High School",
+                "awards": "Silver Medal, National Chemistry Olympiad (2024)\nFinalist, AI for Social Good Challenge (2024)\nRecipient, Mayor's Civic Award for STEM Outreach (2023)",
+                "work_experience": "Machine Learning Intern, AI Future Lab (July 2024 - PRESENT)\nWorked on developing a convolutional neural network (CNN) for medical imaging. Collaborated with a team to preprocess datasets and optimize models for greater prediction accuracy. Reference: Dr. Elena Moore | elena.moore@aifuturelab.org\n\nSTEM Outreach Coordinator, TechEd Society (May 2023 - June 2024)\nDesigned and conducted workshops on coding and AI for underprivileged youth. Secured partnerships with local schools to expand the program reach. Reference: James Watson | james.watson@techedsociety.ca",
+                "certifications": "TensorFlow Developer Certificate\nGoogle Data Analytics Professional Certificate",
+                "projects": "EcoDrone (July 2024)\nDesigned a drone capable of detecting illegal logging activities using satellite imaging and AI. Achieved 92% accuracy in identifying deforestation patterns through TensorFlow models.\n\nAutoCrop (March 2024)\nDeveloped a Python-based system to automate crop health monitoring using drone imagery. Integrated NDVI analysis for precision agriculture insights.",
+                "skills": "Python, TensorFlow, Data Analytics, Public Speaking, Team Collaboration",
+                "interests": "Environmental Sustainability, AI for Social Good, STEM Outreach",
                 "university": "University of Waterloo",
-                "major": "Environmental Engineering"
-            },
-            {
-                "school": "Lincoln High School",
-                "age": "18",
-                "awards": "Regional Debate Champion, School Valedictorian",
-                "work_experience": "Intern at Local Newspaper, Volunteer at Animal Shelter",
-                "certifications": "Journalism Workshop Certificate, Advanced Spanish Language Certification",
-                "projects": "Editor of School Newspaper, Organized Charity Drive for Homeless Shelter",
-                "skills": "Writing, Critical Thinking, Bilingual in English and Spanish",
-                "interests": "Journalism, Animal Welfare",
-                "university": "University of Waterloo",
-                "major": "Journalism"
-            },
-            {
-                "school": "Central High School",
-                "age": "19",
-                "awards": "State Track and Field Champion, National Honor Society Member",
-                "work_experience": "Assistant Coach for Middle School Track Team, Volunteer at Senior Care Center",
-                "certifications": "First Aid and CPR Certified, Coaching Certification Level 1",
-                "projects": "Organized Community Fitness Program, Research on Sports Nutrition",
-                "skills": "Leadership, Time Management, Athletic Training",
-                "interests": "Sports Medicine, Community Health",
-                "university": "University of Waterloo",
-                "major": "Kinesiology"
-            },
-            {
-                "school": "Eastside High School",
-                "age": "18",
-                "awards": "Art Competition Winner, Scholarship for Creative Writing",
-                "work_experience": "Freelance Graphic Designer, Volunteer at Art Museum",
-                "certifications": "Adobe Creative Suite Certified, Creative Writing Workshop Certificate",
-                "projects": "Illustrated Children's Book, Curated School Art Exhibition",
-                "skills": "Digital Illustration, Creative Writing, Event Planning",
-                "interests": "Visual Arts, Literature",
-                "university": "University of Waterloo",
-                "major": "Illustration"
-            },
-            {
-                "school": "Westview High School",
-                "age": "17",
-                "awards": "Robotics Competition National Finalist, Math League Champion",
-                "work_experience": "Intern at Engineering Firm, Volunteer at STEM Camp for Kids",
-                "certifications": "Robotics Programming Certification, Advanced Calculus Course",
-                "projects": "Built Autonomous Drone, Developed Algorithm for Optimizing Traffic Flow",
-                "skills": "Robotics, Python Programming, Analytical Thinking",
-                "interests": "Artificial Intelligence, Mechanical Engineering",
-                "university": "University of Waterloo",
-                "major": "Robotics Engineering"
-            },
-            {
-                "school": "Southridge High School",
-                "age": "18",
-                "awards": "National History Day Winner, Model United Nations Best Delegate",
-                "work_experience": "Intern at Historical Society, Volunteer at Local Library",
-                "certifications": "Advanced Placement Scholar, Historical Research Methods Certificate",
-                "projects": "Documentary on Civil Rights Movement, Organized School History Bee",
-                "skills": "Research, Public Speaking, Leadership",
-                "interests": "History, International Relations",
-                "university": "Georgetown University",
-                "major": "International Relations"
-            },
-            {
-                "school": "Northgate High School",
-                "age": "19",
-                "awards": "State Music Competition Winner, Orchestra Concertmaster",
-                "work_experience": "Music Tutor, Volunteer at Community Theater",
-                "certifications": "Grade 8 Violin Certification, Music Theory Advanced Level",
-                "projects": "Composed Original Symphony, Led School Orchestra Tour",
-                "skills": "Violin Performance, Composition, Team Collaboration",
-                "interests": "Classical Music, Music Education",
-                "university": "Juilliard School",
-                "major": "Violin Performance"
-            },
-            {
-                "school": "Brookfield High School",
-                "age": "17",
-                "awards": "National Coding Competition Winner, Science Olympiad Medalist",
-                "work_experience": "Intern at Software Startup, Volunteer at Coding Bootcamp for Youth",
-                "certifications": "Java Programming Certification, Data Structures and Algorithms Course",
-                "projects": "Developed Educational Game App, Research on Machine Learning Models",
-                "skills": "Java, Machine Learning, Problem-Solving",
-                "interests": "Computer Science, Educational Technology",
-                "university": "Carnegie Mellon University",
                 "major": "Computer Science"
             },
             {
-                "school": "Riverside High School",
-                "age": "18",
-                "awards": "Young Entrepreneurs Award, Business Plan Competition Winner",
-                "work_experience": "Founder of Online Retail Store, Volunteer at Business Incubator",
-                "certifications": "Entrepreneurship Course Certificate, Digital Marketing Certification",
-                "projects": "Launched E-commerce Platform, Organized Startup Weekend at School",
-                "skills": "Entrepreneurship, Marketing, Team Leadership",
-                "interests": "Business Development, E-commerce",
-                "university": "University of Pennsylvania",
-                "major": "Entrepreneurship"
+                "school": "Brookfield High School",
+                "awards": "Gold Medal, International Physics Olympiad (2024)\nTop 5 Finalist, International Astronomy & Astrophysics Competition (2023)\nExcellence in Research, Ottawa Science Fair (2023)",
+                "work_experience": "Research Assistant, Astrophysics Lab, Carleton University (June 2024 - PRESENT)\nAssisted in data analysis for a study on exoplanet atmospheric conditions. Created Python scripts to process spectral data and visualize results. Reference: Dr. Richard Kent | richard.kent@carleton.ca\n\nPhysics Tutor, Ottawa Youth Tutoring Initiative (September 2023 - May 2024)\nProvided weekly one-on-one tutoring sessions for high school students struggling with physics concepts. Reference: Sarah Lin | sarah.lin@oyti.ca",
+                "certifications": "Advanced Python Programming Certificate\nIntroduction to Astrophysics by edX",
+                "projects": "Stellar Spectroscopy Analyzer (April 2024)\nDeveloped a Python-based tool to analyze and classify star types using spectral data. Presented findings at the Regional Science Fair.\n\nPlanetarium VR (October 2023)\nDesigned an immersive VR application that simulates star-gazing experiences based on real-time celestial data. Integrated Unity and C# for the project.",
+                "skills": "Python, Data Visualization, C#, Public Speaking, Research Methodologies",
+                "interests": "Astronomy, Physics, Data Science, VR Development",
+                "university": "Carleton University",
+                "major": "Astrophysics"
             },
             {
-                "school": "Merivale High School",
-                "age": "18",
-                "awards": "Math Olympiad State Champion, Physics Bowl Winner",
-                "work_experience": "Engineer, Sparkling H20 Youth Robotics 					                       July 2024  - PRESENT\nPart of the software team. Used Java to develop subsystems and commands to control the FIRST competition robots. Participated in competitions for testing and calibrating robots.\nWorked with the mechanical and outreach team to develop strategies, plan, and build the robot\nReference: Spark Youth Robotics Club  | spark.youthrc@gmail.com",
-                "certifications": "Advanced Physics Certification, Machine Learning Basics",
-                "projects": "Simulated Astrophysics Model, Built Custom 3D Printer",
-                "skills": "Physics, Data Analysis, CAD Design",
-                "interests": "Astrophysics, Robotics",
+                "school": "Lisgar Collegiate Institute",
+                "awards": "Bronze Medal, Canadian Biology Olympiad (2024)\nBest Project Award, National Youth Innovation Challenge (2023)\nDean’s List, Honor Roll for Academic Excellence (2023)",
+                "work_experience": "Lab Intern, Ottawa General Hospital (July 2024 - PRESENT)\nConducted PCR and ELISA tests in a clinical lab setting. Assisted with patient data entry and analysis. Reference: Dr. Elena Roberts | elena.roberts@ogh.ca\n\nVolunteer Coordinator, Green Earth Organization (May 2023 - June 2024)\nOrganized tree-planting drives and community clean-up events. Managed over 50 volunteers per event. Reference: James Howard | james.howard@greenearth.org",
+                "certifications": "Medical Laboratory Assistant Certification\nBiology Essentials for Healthcare Professionals by Coursera",
+                "projects": "Gene Editing Simulation (June 2024)\nCreated an educational tool to simulate CRISPR gene-editing processes. Used Python and Flask for backend development.\n\nUrban Ecology Mapping (January 2024)\nCollaborated with local NGOs to map biodiversity in urban parks. Developed an interactive web-based visualization using JavaScript and Leaflet.js.",
+                "skills": "Python, Biology Lab Techniques, Flask, Leadership, Communication",
+                "interests": "Genetics, Ecology, Community Service, Data Visualization",
                 "university": "University of Waterloo",
-                "major": "Engineering"
+                "major": "Biology and Environmental Science"
+            },
+                {
+                "school": "Canterbury High School",
+                "awards": "National Young Composers Award (2024)\n1st Place, Provincial Robotics Competition (2023)\nArtistic Excellence Award, Ottawa Arts Festival (2023)",
+                "work_experience": "Composer Intern, Ottawa Symphony Orchestra (June 2024 - PRESENT)\nWorked with senior composers to develop modern orchestral pieces. Coordinated live rehearsals and provided feedback for musicians. Reference: Anna Tchaikovsky | anna.t@ottawasymphony.ca\n\nRobotics Club Mentor, Canterbury High Robotics (September 2023 - June 2024)\nGuided junior members in programming and mechanical design. Helped the team secure first place in the provincial competition. Reference: Mark Stevenson | mark.stevenson@canterburyrobotics.ca",
+                "certifications": "Music Theory and Composition Certificate\nArduino Robotics Certification",
+                "projects": "Symphonic AI (August 2024)\nDeveloped an AI-driven software that generates orchestral compositions based on input parameters. Used Python and TensorFlow for AI training.\n\nSmart Plant System (February 2024)\nDesigned an Arduino-based automated watering system for houseplants. Created a companion mobile app using Flutter for real-time monitoring.",
+                "skills": "Python, TensorFlow, Music Composition, Arduino, Leadership",
+                "interests": "Music, Robotics, AI, Sustainability",
+                "university": "University of Waterloo",
+                "major": "Engineering and Music Technology"
+            },
+            {
+                "school": "Gloucester High School",
+                "awards": "Top Innovator Award, National Business Challenge (2024)\n1st Place, Local Hackathon for Sustainable Solutions (2023)\nRecipient, Entrepreneurial Leadership Award (2023)",
+                "work_experience": "Startup Founder, GreenSolutions (March 2024 - PRESENT)\nLaunched a startup focused on creating sustainable packaging solutions. Secured seed funding and partnerships with local businesses. Reference: John Edwards | john.edwards@greensolutions.com\n\nIntern, Ottawa Economic Development Agency (May 2023 - February 2024)\nAssisted in drafting proposals for local business grants. Conducted market research to support policy recommendations. Reference: Sarah Wright | sarah.wright@ottawaeda.ca",
+                "certifications": "Sustainable Business Practices by LinkedIn Learning\nIntermediate Java Programming Certificate",
+                "projects": "EcoPack (June 2024)\nDeveloped biodegradable packaging material using plant-based polymers. Created prototypes and performed market testing.\n\nBizPlan App (October 2023)\nBuilt a web app to help small businesses generate business plans. Used JavaScript for front-end development and Node.js for the backend.",
+                "skills": "JavaScript, Node.js, Entrepreneurship, Market Analysis, Leadership",
+                "interests": "Business Development, Sustainability, Programming",
+                "university": "University of Waterloo",
+                "major": "Commerce"
+            },
+                {
+                "school": "Nepean High School",
+                "awards": "Gold Medal, National Math Olympiad (2024)\nBest Research Paper, Youth AI Conference (2023)\nHonor Roll, Academic Excellence Award (2023)",
+                "work_experience": "Data Science Intern, AnalyticsLab (July 2024 - PRESENT)\nDeveloped predictive models using Python and R to analyze market trends. Presented insights to stakeholders to guide business strategies. Reference: Dr. Emily Tran | emily.tran@analyticslab.com\n\nTeaching Assistant, MathEnrichment Academy (September 2023 - June 2024)\nProvided group tutoring for advanced calculus and linear algebra. Assisted in curriculum development for summer programs. Reference: Michael Lee | michael.lee@mathenrichment.ca",
+                "certifications": "Data Science Professional Certificate by IBM\nAdvanced R Programming Certification",
+                "projects": "Stock Market Predictor (May 2024)\nBuilt a machine learning model to predict stock price movements using historical data. Utilized Python libraries like scikit-learn and pandas.\n\nAI Tutor (December 2023)\nCreated an AI chatbot for math tutoring. Integrated natural language processing techniques to provide real-time explanations.",
+                "skills": "Python, R, Data Analysis, Machine Learning, Public Speaking",
+                "interests": "Data Science, Mathematics, AI Development",
+                "university": "University of Waterloo",
+                "major": "Data Science"
+            },
+            {
+                "school": "St. Patrick's High School",
+                "awards": "1st Place, National Debating Championships (2024)\nOutstanding Achievement Award, Model UN (2023)\nPublic Speaking Champion, Regional Toastmasters Competition (2023)",
+                "work_experience": "Policy Research Intern, Ottawa City Hall (June 2024 - PRESENT)\nAnalyzed local housing policies and drafted reports to propose improvements. Collaborated with teams on urban planning projects. Reference: Maria Sanchez | maria.sanchez@ottawacityhall.ca\n\nDebate Coach, St. Patrick’s Debate Club (September 2023 - June 2024)\nTrained junior debaters in argumentation techniques. Organized and judged regional debate tournaments. Reference: Rachel Cooper | rachel.cooper@stpatricks.ca",
+                "certifications": "Public Policy Essentials by edX\nAdvanced Communication Skills by Coursera",
+                "projects": "Affordable Housing Plan (April 2024)\nCollaborated with peers to draft a comprehensive housing plan for Ottawa, focusing on low-income families. Presented to city officials.\n\nDebate Strategy Guide (October 2023)\nAuthored a guide on effective debating techniques, distributed as a resource in provincial debate clubs.",
+                "skills": "Public Speaking, Research, Policy Analysis, Leadership, Collaboration",
+                "interests": "Public Policy, Debate, Urban Planning, Community Development",
+                "university": "University of Waterloo",
+                "major": "Political Science"
+            },
+            {
+                "school": "Sir Wilfrid Laurier Secondary School",
+                "awards": "Regional Winner, Canadian Young Innovators Challenge (2024)\nExcellence in Coding, National Hackathon (2023)\nTop 3 Finalist, Regional Science Fair (2023)",
+                "work_experience": "Software Developer Intern, CodeSpark Inc. (July 2024 - PRESENT)\nDeveloped mobile app features using React Native. Enhanced user experience by optimizing app loading times. Reference: Alex Johnson | alex.johnson@codespark.com\n\nCamp Counselor, STEM Summer Camp (June 2023 - August 2023)\nTaught coding and robotics to children aged 8-14. Designed engaging STEM-related activities and competitions. Reference: Lisa Martin | lisa.martin@stemcamp.ca",
+                "certifications": "Full-Stack Web Development by Udemy\nReact Native Advanced Training Certificate",
+                "projects": "EcoTracker App (May 2024)\nCreated a mobile app to help users track and reduce their carbon footprint. Implemented APIs for real-time environmental data.\n\nHealthMonitor (November 2023)\nDeveloped a smartwatch app to monitor heart rate and alert users of irregularities. Used Swift for development.",
+                "skills": "React Native, Swift, App Development, Team Collaboration, Creativity",
+                "interests": "Mobile Development, Robotics, Environmental Technology",
+                "university": "University of Waterloo",
+                "major": "Software Engineering"
+            },
+            {
+                "school": "Colonel By Secondary School",
+                "awards": "Bronze Medal, International Biology Olympiad (2024)\nBest Poster Presentation, National Science Fair (2023)\nRecipient, STEM Excellence Scholarship (2023)",
+                "work_experience": "Research Assistant, Ottawa Molecular Biology Lab (July 2024 - PRESENT)\nAssisted in conducting experiments on gene editing using CRISPR technology. Analyzed and documented research findings for publication. Reference: Dr. Claire Bernard | claire.bernard@molecularlab.ca\n\nTutor, BioGenius Academy (September 2023 - June 2024)\nTutored high school students in advanced biology and chemistry. Designed interactive lessons to simplify complex topics. Reference: Jenna Tan | jenna.tan@biogenius.com",
+                "certifications": "Genomics and Biotechnology Certificate by edX\nAdvanced Biostatistics by Coursera",
+                "projects": "CRISPR-Driven Gene Therapy (March 2024)\nCollaborated on a project to study the application of CRISPR in treating genetic disorders. Used bioinformatics tools to analyze DNA sequences.\n\nSustainable Farming Solutions (December 2023)\nDeveloped an experiment to optimize crop yield using organic fertilizers. Results presented at the National Science Fair.",
+                "skills": "Molecular Biology, Bioinformatics, Data Analysis, Teaching, Presentation Skills",
+                "interests": "Genetic Engineering, Environmental Sustainability, Public Health",
+                "university": "University of Waterloo",
+                "major": "Molecular Biology and Genetics"
+            },
+            {
+                "school": "Earl of March Secondary School",
+                "awards": "1st Place, National Robotics Championship (2024)\nInnovation Award, Regional Coding Competition (2023)\nRecipient, Governor General’s Academic Medal (2023)",
+                "work_experience": "Robotics Engineer Intern, TechNova Robotics (June 2024 - PRESENT)\nDeveloped autonomous systems for industrial robots. Improved navigation algorithms for efficiency in warehouse settings. Reference: Paul Jenkins | paul.jenkins@technova.com\n\nFreelance Web Developer (January 2023 - May 2024)\nBuilt custom websites for small businesses. Focused on responsive design and e-commerce integrations. Reference: Olivia Harper | olivia.harper@webworks.ca",
+                "certifications": "Advanced Robotics Programming by Udacity\nCertified Web Developer by FreeCodeCamp",
+                "projects": "Drone Delivery System (April 2024)\nDesigned and programmed an autonomous drone for small package deliveries. Implemented GPS and computer vision for navigation.\n\nE-Commerce Website Template (July 2023)\nCreated a customizable website template for small businesses. Features included payment gateway integration and analytics.",
+                "skills": "C++, Python, Computer Vision, Web Development, Problem-Solving",
+                "interests": "Robotics, AI, Web Development, Entrepreneurship",
+                "university": "University of Waterloo",
+                "major": "Mechatronics Engineering"
             }
         ]
+
 
         # Predefined Answers only used for testing
         self.predefined_answers = {
@@ -717,7 +774,7 @@ class ProfileComparator(QWidget):
         self.handle_inputs(self.predefined_answers)
 
     def handle_inputs(self, inputs):
-        #print(inputs)
+        print(inputs)
         self.process_comparison(inputs)
 
     def clean_text(self, text):
@@ -769,14 +826,14 @@ class ProfileComparator(QWidget):
 
     def process_comparison(self, user_original_profile):
         weights = {
-            "school": 0.05,
+            "school": 0.01,
             "awards": 0.25,
             "work_experience": 0.25,
             "certifications": 0.1,
             "projects": 0.2,
-            "skills": 0.05,
-            "interests": 0.05,
-            "major": 0.05
+            "skills": 0.1,
+            "interests": 0.01,
+            "major": 0.03
         }
 
         # Mapping of old keys to new keys
@@ -1025,7 +1082,7 @@ class CompetitionFinder(QWidget):
             ("Enter State/Province:", "text"),
             ("Enter Country:", "text"),
             ("Enter Age:", "text"),
-            ("Enter Interests:", "textarea"),
+            ("Enter Interests (if multiple, separate with comma + space):", "textarea"),
             ("Enter Current Education Status:", "combobox", ["High School", "Middle School", "University/College"])
         ]
         
@@ -1040,7 +1097,7 @@ class CompetitionFinder(QWidget):
         print("Collected Answers:", answers)
         
         # Now use the collected answers to call your competition finding function
-        results = find_competitions(answers["Enter City:"], answers["Enter State/Province:"], answers["Enter Country:"], answers["Enter Age:"], answers["Enter Interests:"], answers["Enter Current Education Status:"])
+        results = find_competitions(answers["Enter City:"], answers["Enter State/Province:"], answers["Enter Country:"], answers["Enter Age:"], answers["Enter Interests (if multiple, separate with comma + space):"], answers["Enter Current Education Status:"])
         
         # Display results on the same window after questions are completed
         self.display_results(results)
@@ -1185,7 +1242,6 @@ class CompetitionFinder(QWidget):
 
             # Make sure the result item stretches to the full width of the scroll area
             result_item.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-
 
             # Add the result item to the results layout
             results_layout.addWidget(result_item)
@@ -1373,11 +1429,235 @@ class ResumeOptimizer(QWidget):
                 job_file.write("\nRequirements & Qualifications:\n" + answers["Requirements & Qualifications:"] + "\n")
 
             # Call the `run` function
-            result = "\n".join(run(job_file_path, resume_file_path))
-            print("Done!")
+            result = run(job_file_path, resume_file_path)
             self.display_results(result)
         except Exception as e:
             self.display_results(f"An error occurred: {e}")
+
+    def display_results(self, results):
+        # Clear the current content by removing the current widget
+        if self.stacked_widget.count() > 0:
+            self.stacked_widget.removeWidget(self.stacked_widget.currentWidget())
+
+        self.results = results
+
+        # Header Section - Layered Title
+        self.title_container = QWidget()  # Container for the titles
+        self.title_container.setFixedWidth(800)  # Set the width of the container
+        self.title_container.setFixedHeight(40)  # Adjust as necessary
+        self.title_container.setStyleSheet("background-color: transparent; margin-top: -20px;")  
+
+        # Shared font settings
+        title_font = QFont("Coming Soon")
+        title_font.setPointSize(50)
+        title_font.setBold(True)
+
+        # Yellow shadow (slightly shifted left)
+        title_label_shadow = QLabel("afoofa", self.title_container)
+        title_label_shadow.setFont(title_font)
+        title_label_shadow.setStyleSheet("""
+            font-family: 'Coming Soon', sans-serif;
+            font-size: 40px;
+            color: #FED82D;
+            padding: 10px;
+        """)
+        title_label_shadow.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        title_label_shadow.move(0, 0)  # Slightly shift to the left
+
+        # Orange main title (centered on top)
+        title_label = QLabel("afoofa", self.title_container)
+        title_label.setFont(title_font)
+        title_label.setStyleSheet("""
+            font-family: 'Coming Soon', sans-serif;
+            font-size: 40px;
+            color: #FF532B;
+            padding: 10px;
+        """)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        title_label.move(-5, 5)  # Center-aligned relative to the shadow
+
+        # Layout for the title container (centered)
+        title_layout = QHBoxLayout()
+        title_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # Align content to the left
+        title_layout.addWidget(self.title_container)
+
+        # Add the centered title layout to the main layout
+        header_widget = QWidget()
+        header_widget.setLayout(title_layout)
+
+        # Subtitle Section
+        subtitle_label = QLabel("an app all for one, and one for all students")
+        subtitle_font = QFont("Arial")
+        subtitle_font.setPointSize(12)
+        subtitle_font.setBold(True)
+        subtitle_label.setFont(subtitle_font)
+        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        subtitle_label.setStyleSheet("""
+            color: gray;
+            margin-top: 0px;
+            padding-left: 10px;  /* Adds padding to the left */
+        """)
+
+        # Create a main layout and add the title container and subtitle
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(header_widget)
+        main_layout.addWidget(subtitle_label)
+
+        # Content Section
+        central_layout = QVBoxLayout()
+
+        # Title Label
+        result_title_label = QLabel(results[0] if results else "No Results")
+        result_title_label.setStyleSheet("""
+            font-size: 20px; font-weight: bold; color: #FF532B; 
+            background-color: #FED82D; border-radius: 20px;
+            padding: 10px;
+        """)
+        result_title_label.setFixedSize(430, 45)
+        result_title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        central_layout.addWidget(result_title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Scrollable content area
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedSize(850, 300)
+        scroll_area.setStyleSheet("""
+            border: 3px solid #FF532B;
+            background-color: #FF532B;
+            border-radius: 20px 20px 20px 20px;
+        """)
+
+        self.results_widget = QWidget()
+        self.results_layout = QVBoxLayout(self.results_widget)
+        scroll_area.setWidget(self.results_widget)
+
+        # Buttons for navigating results
+        buttons_widget_left = QWidget()  # Left buttons
+        buttons_layout_left = QVBoxLayout(buttons_widget_left)
+
+        buttons_widget_right = QWidget()  # Right buttons
+        buttons_layout_right = QVBoxLayout(buttons_widget_right)
+
+        button_labels = ["Skill Report", "Similar Skills", "Acronyms", "Action Words"]
+
+        for i in range(1, len(results)):
+            button = QPushButton(button_labels[i - 1])
+            button.setStyleSheet("""
+                background-color: #FF532B; color: #FED82D;
+                font-size: 14px; font-weight: bold; border-radius: 20px;
+                height: 40px;
+            """)
+            button.clicked.connect(lambda _, idx=i: self.display_result(idx))
+
+            if i % 2 == 1:  # Alternate buttons to left and right
+                buttons_layout_left.addWidget(button)
+            else:
+                buttons_layout_right.addWidget(button)
+
+        buttons_widget_left.setFixedWidth(150)  # Limit width of left button container
+        buttons_widget_right.setFixedWidth(150)  # Limit width of right button container
+
+        # Horizontal Layout for Buttons and Scroll Area
+        horizontal_layout = QHBoxLayout()
+
+        # Add left buttons, scroll area, and right buttons in a horizontal layout
+        horizontal_layout.addWidget(buttons_widget_left)
+        horizontal_layout.addWidget(scroll_area)
+        horizontal_layout.addWidget(buttons_widget_right)
+
+        # Set stretching for central layout
+        horizontal_layout.setStretch(0, 1)  # Allow left buttons to take some space
+        horizontal_layout.setStretch(1, 3)  # Allow scroll area to take more space
+        horizontal_layout.setStretch(2, 1)  # Allow right buttons to take some space
+
+        # Central Layout
+        central_layout.addWidget(result_title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        central_layout.addLayout(horizontal_layout)
+        central_layout.setAlignment(horizontal_layout, Qt.AlignmentFlag.AlignCenter)
+
+
+        central_widget = QWidget()
+        central_widget.setLayout(central_layout)
+
+        main_layout.addWidget(central_widget)
+
+        # Footer Section
+        footer_label = QLabel("9akshit1")
+        footer_label.setStyleSheet("font-size: 15px; font-weight: bold; color: #FF532B;")
+        footer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        main_layout.addWidget(footer_label, alignment=Qt.AlignmentFlag.AlignBottom)
+
+        main_widget = QWidget()
+        main_widget.setLayout(main_layout)
+        self.stacked_widget.addWidget(main_widget)
+
+    def display_result(self, idx):
+        # Clear existing widgets in results layout
+        for i in reversed(range(self.results_layout.count())):
+            self.results_layout.itemAt(i).widget().deleteLater()
+
+        # Add selected result content
+        result_label = QLabel(self.results[idx])
+        result_label.setStyleSheet("""
+            color: #FED82D; font-size: 14px; font-weight: bold; padding: 10px;
+        """)
+        result_label.setWordWrap(True)
+        self.results_layout.addWidget(result_label)
+
+# Application Writer Window
+class ApplicationWriter(QWidget):
+    def __init__(self, parent_size):
+        super().__init__()
+        self.setWindowTitle("Application Writer")
+        self.setGeometry(*parent_size)
+        self.setStyleSheet("background-color: #ECE0E0;")  
+
+        layout = QVBoxLayout()
+
+        # Stacked widget to switch between screens
+        self.stacked_widget = QStackedWidget()
+        layout.addWidget(self.stacked_widget)
+
+        # Input questions setup
+        input_questions = [
+            ("Provide Resume Document:", "file"),
+            ("Provide Questions:", "textarea"),
+            ("Choose Style (optional):", "combobox", ["Formal", "Casual"])
+        ]
+
+        self.question_slider = QuestionSlider(input_questions, self.handle_answers, self)
+        self.stacked_widget.addWidget(self.question_slider)
+
+        # Set the layout for the application writer window
+        self.setLayout(layout)
+
+    def handle_answers(self, answers):
+        # Process the answers and create application responses
+        print("Collected Answers:", answers)
+
+        # Call a function to generate the application based on inputs
+        documents = answers.get("Provide Resume Document:")
+        questions = answers.get("Provide Questions:")
+        style = answers.get("Choose Style (optional):")
+
+        results = self.generate_application(documents, questions, style)
+
+        # Display results on the same window after questions are completed
+        self.display_results(results)
+
+    def generate_application(self, documents, questions, style):
+        data = {
+                "uploaded_files": documents,
+                "questions": questions.split("?"),
+                "style": style
+            }
+        return extract_and_generate(data)
+
+        # Placeholder for application generation logic
+        return {"Question 1" : "Generated response for question 1.", 
+                "Question 2" : "Generated response for question 2."}
 
     def display_results(self, results):
         # Clear the current content by removing the current widget
@@ -1455,7 +1735,7 @@ class ResumeOptimizer(QWidget):
         scroll_area.setWidgetResizable(True)
 
         # Set the fixed width and height of the scroll area
-        scroll_area.setFixedWidth(900)
+        scroll_area.setFixedWidth(1200)
         scroll_area.setFixedHeight(350)
 
         # Hide the scrollbars (both vertical and horizontal)
@@ -1471,20 +1751,77 @@ class ResumeOptimizer(QWidget):
             background-color: transparent;  
         """)
 
-        # Display the results
+        # Create the result widget and layout
         results_widget = QWidget()
         results_layout = QVBoxLayout()
+        results_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # Align the results layout
 
-        results_label = QLabel(results)
-        results_label.setStyleSheet("color: #FED82D; padding: 10px; font-weight: bold; background-color: #FF532B;")
-        results_label.setAlignment(Qt.AlignmentFlag.AlignTop)
-        results_label.setWordWrap(True)
+        # Style for each question container (orange background)
+        question_style = """
+            background-color: #FF532B;  
+            border: none;
+            padding: 10px;
+            margin: 0;  
+            border-radius: 50px 50px 50px 50px;  
+            font-family: 'Arial';
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFDD00; 
+            width: 850px;
+        """
 
-        results_layout.addWidget(results_label)
-        # Set up the final layout for the results widget
+        # Style for each answer container (darker orange background)
+        answer_style = """
+            background-color: #E34B22;  
+            border: none;
+            padding: 10px;
+            margin: 0;  
+            margin-top: -75px;
+            margin-left: 15px;  
+            border-radius: 20px 20px 0 0;  
+            font-family: 'Arial';
+            font-size: 13px;
+            font-weight: bold;
+            color: #FFDD00; 
+            width: 800px;  
+        """
+
+        for idx, (question, answer) in enumerate(results.items()):  # Assuming `results` is a dictionary with questions as keys and answers as values
+            # Create a container for both the question and answer (no space in between)
+            container_widget = QWidget()
+
+            # Create a layout to hold the question and answer labels inside the container
+            container_layout = QVBoxLayout()
+            container_layout.setSpacing(0)  # No space between the question and answer
+            container_layout.setContentsMargins(0, 0, 0, 0)  # Remove all margins
+
+            # Create a label for the question with the appropriate style
+            question_label = QLabel(f"Q{idx+1}: {question}")
+            question_label.setStyleSheet(question_style)
+            question_label.setWordWrap(True)  # Allow multiline text
+            question_label.setFixedWidth(1175)  # Set the width of the question rectangle
+            question_label.setFixedHeight(35)  # Set the height of the question rectangle
+
+            # Create a label for the answer with the appropriate style
+            answer_label = QLabel(f"A: {answer}")
+            answer_label.setStyleSheet(answer_style)
+            answer_label.setWordWrap(True)  # Allow multiline text
+            answer_label.setFixedWidth(1160)  # Set the width of the answer rectangle
+
+            # Add the question and answer labels to the layout (tightly packed with no space between)
+            container_layout.addWidget(question_label)
+            container_layout.addWidget(answer_label)
+
+            # Set the layout to the container widget
+            container_widget.setLayout(container_layout)
+
+            # Add the container widget to the results layout
+            results_layout.addWidget(container_widget)
+
+        # Remove borders or padding from the main container to avoid any outer edges
+        results_widget.setStyleSheet("border: none; padding: 0;")
+
         results_widget.setLayout(results_layout)
-
-        # Set the widget for the scroll area
         scroll_area.setWidget(results_widget)
 
         # Create a central layout and center the scroll area
@@ -1521,175 +1858,8 @@ class ResumeOptimizer(QWidget):
         # Add the main widget to the stacked widget
         self.stacked_widget.addWidget(main_widget)
 
-# Application Writer Window
-class ApplicationWriter(QWidget):
-    def __init__(self, parent_size):
-        super().__init__()
-        self.setWindowTitle("Application Writer")
-        self.setGeometry(*parent_size)
-        self.setStyleSheet("background-color: #ECE0E0;") 
-        
-        # Header
-        self.header = QLabel("Application Writer")
-        self.header.setStyleSheet("font-size: 24px; font-weight: bold;")
-        self.subheader = QLabel("Applications for the lazy")
-        self.subheader.setStyleSheet("font-size: 14px; font-style: italic; color: #bbbbbb;")
-        
-        header_layout = QVBoxLayout()
-        header_layout.addWidget(self.header)
-        header_layout.addWidget(self.subheader)
-        header_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        # Upload Documents Section
-        doc_section = QVBoxLayout()
-        doc_title = QLabel("Provide Relevant Documents (max 4)")
-        doc_title.setStyleSheet("font-size: 18px;")
-
-        self.file_preview = QLabel()
-        self.file_preview.setFixedSize(150, 150)
-        self.file_preview.setStyleSheet(
-            "background-color: #333333; border-radius: 10px; border: 1px dashed #444444;"
-        )
-        self.file_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.file_preview.setText("No File Selected")
-
-        self.doc_button = QPushButton("Choose File")
-        self.doc_button.setStyleSheet(
-            "background-color: #1e90ff; color: white; border-radius: 10px; padding: 10px;"
-        )
-        self.doc_button.clicked.connect(self.load_file_preview)
-
-        self.doc_error_label = QLabel("")
-        self.doc_error_label.setStyleSheet("color: red; font-size: 12px;")
-
-        doc_section.addWidget(doc_title)
-        doc_section.addWidget(self.file_preview, alignment=Qt.AlignmentFlag.AlignLeft)
-        doc_section.addWidget(self.doc_button, alignment=Qt.AlignmentFlag.AlignLeft)
-        doc_section.addWidget(self.doc_error_label, alignment=Qt.AlignmentFlag.AlignLeft)
-
-        # Provide Questions Section
-        question_section = QVBoxLayout()
-        question_title = QLabel("Provide Questions")
-        question_title.setStyleSheet("font-size: 18px;")
-
-        self.question_text_box = QTextEdit()
-        self.question_text_box.setPlaceholderText("Enter each question on a new line")
-        self.question_text_box.setFixedHeight(90)
-        self.question_text_box.setStyleSheet(
-            "background-color: #333333; color: white; border-radius: 10px; padding: 5px; "
-        )
-        self.question_text_box.textChanged.connect(self.adjust_question_box_height)
-
-        self.question_error_label = QLabel("")
-        self.question_error_label.setStyleSheet("color: red; font-size: 12px;")
-        
-        question_section.addWidget(question_title)
-        question_section.addWidget(self.question_text_box)
-        question_section.addWidget(self.question_error_label)
-
-        # Style Section
-        style_section = QVBoxLayout()
-        style_title = QLabel("Style (optional)")
-        style_title.setStyleSheet("font-size: 18px;")
-
-        self.style_dropdown = QComboBox()
-        self.style_dropdown.addItems(["Formal", "Casual"])
-        self.style_dropdown.setStyleSheet(
-            "background-color: #333333; color: white; border: none; padding: 5px; border-radius: 10px;"
-        )
-
-        style_note = QLabel("Choose how you want the response to sound.")
-        style_note.setStyleSheet("font-size: 12px; color: #bbbbbb;")
-
-        style_section.addWidget(style_title)
-        style_section.addWidget(self.style_dropdown)
-        style_section.addWidget(style_note)
-
-        # Footer
-        next_button = QPushButton("Next")
-        next_button.setStyleSheet(
-            "background-color: #1e90ff; color: white; font-size: 16px; padding: 10px; border-radius: 10px;"
-        )
-        next_button.setFixedSize(100, 40)
-        next_button.clicked.connect(self.on_next_button_click)
-
-        footer_layout = QHBoxLayout()
-        footer_layout.addStretch()
-        footer_layout.addWidget(next_button)
-
-        # Main layout
-        main_layout = QVBoxLayout()
-        main_layout.addLayout(header_layout)
-        main_layout.addSpacing(20)
-        main_layout.addLayout(doc_section)
-        main_layout.addSpacing(20)
-        main_layout.addLayout(question_section)
-        main_layout.addSpacing(20)
-        main_layout.addLayout(style_section)
-        main_layout.addStretch()
-        main_layout.addLayout(footer_layout)
-
-        self.setLayout(main_layout)
-
-        self.style = "Formal"   #default
-
-    def load_file_preview(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Choose File")
-        if file_name:
-            image_reader = QImageReader(file_name)
-            pixmap = QPixmap.fromImageReader(image_reader)
-            scaled_pixmap = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-            self.file_preview.setPixmap(scaled_pixmap)
-            self.upload_file(file_name)  
-        else:
-            self.file_preview.setText("No File Selected")
-
-    def upload_file(self, file_path):
-        os.makedirs('user_files', exist_ok=True)
-
-        file_name = os.path.basename(file_path)
-        destination = os.path.join('user_files', file_name)
-
-        shutil.copy(file_path, destination)  
-
-    def adjust_question_box_height(self):
-        document = self.question_text_box.document()
-        line_count = document.blockCount()
-        self.question_text_box.setFixedHeight(min(90 + (line_count - 3) * 20, 300))
-
-    def on_next_button_click(self):
-        is_valid = True
-        
-        if not self.file_preview.pixmap():
-            self.doc_error_label.setText("This field must be completed.")
-            is_valid = False
-        else:
-            self.doc_error_label.clear()
-
-        questions = self.question_text_box.toPlainText().strip()
-        if not questions:
-            self.question_error_label.setText("This field must be completed.")
-            is_valid = False
-        else:
-            self.question_error_label.clear()
-
-        self.style = self.style_dropdown.currentText() if self.style_dropdown.currentText() else "Formal"
-
-        if is_valid:
-            uploaded_files = [os.path.join('user_files', f) for f in os.listdir('user_files')]
-            data = {
-                "uploaded_files": uploaded_files,
-                "questions": questions,
-                "style": self.style
-            }
-            subprocess.run(["python", "application_writer/extract.py"], input=str(data), text=True)
-        else:
-            print("Please complete all fields.")
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-    apply_dark_theme(app)
 
     main_window = MainApp()
     main_window.show()

@@ -2,7 +2,7 @@ import logging
 import json
 import numpy as np
 import os
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM
 import torch
 
 
@@ -30,18 +30,24 @@ def Generate_Main(all_extracted_info):
 
             report_text += "\n---\n\n"
 
-        output_report_filepath = "generated_report.txt"
+        output_report_filepath = "application_writer/generated_report.txt"
         with open(output_report_filepath, "w", encoding='utf-8') as file:
             file.write(report_text)
 
-        output_json_filepath = "generated_report.json"
+        output_json_filepath = "application_writer/generated_report.json"
         with open(output_json_filepath, "w", encoding='utf-8') as file:
             json.dump(all_extracted_info, file, indent=2, default=numpy_serializer)
 
         logger.info(f"Report generated and saved to {output_report_filepath}")
         logger.info(f"JSON report saved to {output_json_filepath}")
 
-        return report_text
+        input_file = "application_writer/generated_report.json"
+
+        if os.path.exists(input_file):
+            print("Generating paragraph answers...")
+            return generate_paragraph_answers(input_file)
+        else:
+            print(f"Input file '{input_file}' not found. Please ensure the report is generated.")
 
     except Exception as e:
         logging.error(f"Error generating report: {e}")
@@ -70,17 +76,38 @@ def format_report(json_file):
     except Exception as e:
         print(f"Error formatting report: {e}")
 
+def gpt2_model_load():
+    model_name = "gpt2"
+    model = GPT2LMHeadModel.from_pretrained(model_name)
+    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+    return tokenizer, model
+
+def flan_t5_model_load():
+    model_name = "google/flan-t5-base"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        model_name,
+        device_map="auto"  # Adjust device usage automatically
+    )
+    return tokenizer, model
+
+def llama_model_load():
+    model_name = "meta-llama/Llama-2-7b-chat-hf"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        device_map="auto"  # Adjust device usage automatically
+    )
+    return tokenizer, model
 
 def generate_paragraph_answers(json_file):
     try:
-        model_name = "gpt2"
-        model = GPT2LMHeadModel.from_pretrained(model_name)
-        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        tokenizer, model = gpt2_model_load()
 
         with open(json_file, 'r', encoding='utf-8') as f:
             report = json.load(f)
 
-        paragraph_responses = []
+        paragraph_responses = {}
         for query_block in report:
             query = query_block.get("query", "No query found")
             results = query_block.get("results", [])
@@ -88,43 +115,35 @@ def generate_paragraph_answers(json_file):
 
             if context:
                 input_text = f"""
-                **Question:** {query}
+                **Task:** Based on the provided context below, please answer the question below in a well-structured, comprehensive, and grammatically correct paragraph. 
+                Ensure the response is coherent, clear, and free of errors. Avoid adding any unrelated or fake details. The answer should be complete and logically consistent, summarizing the key points from the context.
                 **Context:** {context}
-                **Task:** Based on the provided context, please answer the question in a well-structured, comprehensive, and grammatically correct paragraph. 
-                Ensure the response is coherent, clear, and free of errors. The answer should be complete and logically consistent, summarizing the key points from the context.
-                """
-
+                **Question:** {query}?
+                """.strip()
+                #print(input_text)
                 inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True)
+
                 attention_mask = torch.ones(inputs.shape, dtype=torch.long)
                 output = model.generate(
-                    inputs, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id,
-                    max_length=1024, num_return_sequences=1, num_beams=2, no_repeat_ngram_size=2, early_stopping=True
-                )
+                    inputs, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id, max_new_tokens=500,
+                    num_return_sequences=1, num_beams=2, no_repeat_ngram_size=2, early_stopping=True)
 
-                answer = tokenizer.decode(output[0], skip_special_tokens=True).strip()
-                response = f"**Question:** {query}\n**Answer:** {answer}\n"
-
-                # Remove everything before * * **Questions:*
-                response = response[response.find("* * **Questions:*"):]
-                paragraph_responses.append(response)
-
+                # Decode only the generated tokens, excluding the input tokens
+                generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+                #print(generated_text)
+                response_start_index = len(input_text.strip()) + 1  # The index right after the input. This is fro the gpt2 model only
+                answer = generated_text[response_start_index:].strip()  # Trim the start of the generated text
+                #print("\n**Answer:**", answer)
+                response = answer
+                paragraph_responses[query + "?"] = response
             else:
                 response = f"**Question:** {query}\n**Answer:** No relevant information found.\n"
                 response = response[response.find("* * **Questions:*"):]
-                paragraph_responses.append(response)
+                paragraph_responses[query + "?"] = response
 
-        for response in paragraph_responses:
-            print(response)
-        
+        for response in list(paragraph_responses.values()):
+            print("\nResponse:", response)
+        return paragraph_responses
 
     except Exception as e:
         print(f"Error generating paragraph answers: {e}")
-
-
-input_file = "generated_report.json"
-
-if os.path.exists(input_file):
-    print("Generating paragraph answers...")
-    generate_paragraph_answers(input_file)
-else:
-    print(f"Input file '{input_file}' not found. Please ensure the report is generated.")

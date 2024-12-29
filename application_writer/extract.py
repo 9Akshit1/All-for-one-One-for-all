@@ -58,17 +58,17 @@ class AdvancedDocumentQA:
             if file_path.lower().endswith('.pdf'):
                 with fitz.open(file_path) as pdf:
                     text = " ".join([page.get_text() for page in pdf])
-                    return self.preprocess_text(text)
+                    return text, self.preprocess_text(text)
             elif file_path.lower().endswith('.txt'):
                 with open(file_path, 'r', encoding='utf-8') as file:
                     text = file.read()
-                    return self.preprocess_text(text)
+                    return text, self.preprocess_text(text)
             else:
                 self.logger.warning(f"Unsupported file type: {file_path}")
-                return ""
+                return "", ""
         except Exception as e:
             self.logger.error(f"Text extraction error for {file_path}: {e}")
-            return ""
+            return "", ""
 
     def chunk_text(self, text: str, chunk_size: int = 400, overlap: int = 50) -> List[str]:
         chunks = []
@@ -99,13 +99,14 @@ class AdvancedDocumentQA:
         return 0.7 * semantic_similarity + 0.3 * keyword_overlap
 
     def process_document(self, file_path: str):
-        text = self.extract_text_from_file(file_path)
+        real_text, text = self.extract_text_from_file(file_path)
+        real_chunks = self.chunk_text(real_text)
         chunks = self.chunk_text(text)
         embeddings = [self.embed_text(chunk) for chunk in chunks]
 
         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
             vector_id = f"{file_path}_{i}"
-            self.metadata[vector_id] = {"text": chunk, "source": file_path}
+            self.metadata[vector_id] = {"real_text": real_chunks[i], "processed_text": chunk, "source": file_path}
             self.index.add(np.array(embedding))
 
         self.logger.info(f"Processed {file_path}: {len(chunks)} chunks")
@@ -118,10 +119,11 @@ class AdvancedDocumentQA:
         for idx, dist in zip(indices[0], distances[0]):
             if idx < len(self.metadata):
                 vector_id = list(self.metadata.keys())[idx]
-                text_chunk = self.metadata[vector_id]["text"]
-                score = self.weighted_score(question, text_chunk)
+                real_text_chunk = self.metadata[vector_id]["real_text"]
+                processed_text_chunk = self.metadata[vector_id]["processed_text"]
+                score = self.weighted_score(question, processed_text_chunk)
                 results.append({
-                    "text": text_chunk,
+                    "text": real_text_chunk,
                     "source": self.metadata[vector_id]["source"],
                     "score": score
                 })
@@ -133,24 +135,17 @@ class AdvancedDocumentQA:
         # Example placeholder for fine-tuning if labeled data is available
         pass
 
-def main():
+def extract_and_generate(data):
     INDEX_NAME = 'advanced-document-qa'
-    input_data = sys.stdin.read()
 
-    try:
-        data = ast.literal_eval(input_data)
-    except Exception as e:
-        print(f"Input parsing error: {e}")
-        return
-
-    uploaded_files = data.get("uploaded_files", [])
-    questions = data.get("questions", "").split('\n')
+    uploaded_files = data["uploaded_files"]
+    questions = data["questions"]
+    style = data["style"]
 
     try:
         qa_system = AdvancedDocumentQA(INDEX_NAME)
 
-        for file_path in uploaded_files:
-            qa_system.process_document(file_path)
+        qa_system.process_document(uploaded_files)
 
         all_extracted_info = []
 
@@ -160,13 +155,9 @@ def main():
                 all_extracted_info.append(results)
                 print(f"Question: {question}")
 
-        
+        print(all_extracted_info)
 
-        #print(all_extracted_info)
-        Generate_Main(all_extracted_info)
+        return Generate_Main(all_extracted_info)
 
     except Exception as e:
         print(f"Error: {e}")
-
-
-main()

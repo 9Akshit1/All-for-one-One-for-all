@@ -1,9 +1,59 @@
-Query: What are your awards?
-Relevant Snippet (Score: 0.18736311793327332): roject gia hacks hackathon place winner edupiano project ontario silver medal exemplary academic display achieve average ottawa regional science fair curiosity ingenuity category winner fryer uwaterloo competition national rank canadian computing competition junior distinction canadian intermediate mathematics canada uwaterloo national rank ottawa regional science fair ashrae special award winner 
-Relevant Snippet (Score: 0.14871147274971008): akshit manikanta erukulla ontario linkedin github education certifications merivale high school ottawa year avg graduating year international baccalaureate ib program achieve honour roll silver medal subject include mathematics science technology computer science member computer science club robotics club model un club chemistry club chapter president creator merivale business club ottawa aces cha
-Relevant Snippet (Score: 0.11202146112918854): regional science fair ashrae special award winner obotz olympiad national rank graduate level obotz barrhaven robotics honour roll competition winner earned drone license c intermediate python intermediate javascript intermediate certificate volunteer work experience founder president ottawa aces business chapter august present increase social medium presence regularly update instagram post set ev
-Relevant Snippet (Score: 0.09139402955770493): piano music song sheet music develop piano friendly ui pygame design irl projection piano prototype posture corrector teach user step step exoplanet habitability predictor feburary analyze trend correlation nasa exoplanet archive python matplotlib library develop novel method calculate relative habitability exoplanet base planetary stellar characteristic python pandas numpy scipy visualized datum 
-Relevant Snippet (Score: 0.03972424939274788): um presence regularly update instagram post set event lesson bring guest speaker teacher work bring sponsor develop startup business reference aces web developer fresh future foundation august present leveraged html css revamp frontend organization website increase social medium presence regularly update instagram post connection set event idea organization hackathon code robotic project reference
+Query: How does your work experience qualify you for this website developer position
+Relevant Snippet (Score: 0.2405923455953598): r (2023)
+●
+Obotz Olympiad National 1st Rank (2020)
+●
+Graduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner
+●
+Earned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates
+VOLUNTEER & WORK EXPERIENCE
+Founder & President, Ottawa ACES Business Chapter
+August 2024 - PRESENT
+●
+Increased social media presence by regularly up
+Relevant Snippet (Score: 0.21917037665843964): echnology (95%), Computer Science (100%)
+●
+Member of the Computer Science Club, Robotics Club, Model UN Club, Chemistry Club
+●
+Chapter President/Creator of the Merivale Business Club (Ottawa ACES Chapter)
+SKILLS
+●
+Main Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java
+●
+Experience in AI/ML, Arduino, Game Development, Web Development, Data Analytics
+●
+Soft Skills: Lead
+Relevant Snippet (Score: 0.2018515169620514): ng a +90% Average (2024)
+●
+Ottawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)
+●
+Fryer UWaterloo Competition National Rank 104 (2024)
+●
+Canadian Computing Competition Junior Distinction (2024)
+●
+Canadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)
+●
+Ottawa Regional Science Fair ASHRAE Special Award Winner (2023)
+●
+Obotz Olympiad National 1st Rank (2020)
+Relevant Snippet (Score: 0.1910238265991211):  complex algorithms to calculate the most comfortable finger positions of a piano
+music song from sheet music. Developed a 2D piano and friendly UI using Pygame.
+●
+Designed an IRL projection piano prototype and a posture corrector to teach users step by step.
+Exoplanet Habitability Predictor
+Feburary 2024
+●
+Analyzed trends & correlations in the NASA Exoplanet Archive using Python Matplotlib librar
+Relevant Snippet (Score: 0.1749214082956314): stitching robot by utilizing computer vision (Python) and Embedded C
+●
+Developed a new stitching method through 3D simulations and CAD modelling
+●
+Generated different prototype models and demonstrated a working example to an audience
+Traffic Analyzer & Carjacking Camera
+September 2024
+●
+Utilized TensorFlow and video framing modules to analyze traffic videos. Identified traffic hotspots, and
+root c
 
 ---
 

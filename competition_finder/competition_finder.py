@@ -1,56 +1,39 @@
 import requests
 from bs4 import BeautifulSoup
-import json
+import random
+import time
 
-def fetch_devpost_competitions(interests):
-    """
-    Fetches hackathons from Devpost related to the user's interests.
+# Function to generate refined search prompts based on user inputs
+def generate_search_prompts(interests, education_status, age, location):
+    base_prompts = []
+    interests_list = [interest.strip() for interest in interests.split(",")]
 
-    Args:
-        interests (str): User's interests (e.g., coding, AI).
+    # Create search prompts for each interest
+    for interest in interests_list:
+        base_prompts.append(
+            f"{interest} competitions for {education_status} aged {age}"
+        )
+        base_prompts.append(
+            f"{interest} contests for students in {location} or online"
+        )
+        base_prompts.append(
+            f"opportunities for {education_status} interested in {interest}"
+        )
+        base_prompts.append(
+            f"lesser-known {interest} contests 2024"
+        )
 
-    Returns:
-        list: List of competitions with details from Devpost.
-    """
-    url = f"https://devpost.com/hackathons?search={interests.replace(' ', '+')}"
-    competitions = []
+    additional_keywords = ["international/worldwide", "local", "online"]
 
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
+    refined_prompts = []
+    for prompt in base_prompts:
+        for keyword in additional_keywords:
+            refined_prompts.append(f"{prompt} {keyword}")
 
-        # Extract hackathon details
-        for item in soup.find_all("div", class_="hackathon-tile"):
-            title = item.find("h3").text.strip() if item.find("h3") else "No Title"
-            link = "https://devpost.com" + item.find("a")["href"] if item.find("a") else "No Link"
-            snippet = item.find("p", class_="description").text.strip() if item.find("p", class_="description") else "No Description"
+    return refined_prompts
 
-            competitions.append({
-                "title": title,
-                "link": link,
-                "snippet": snippet,
-                "eligibility": "Check the hackathon page for detailed eligibility criteria."
-            })
-
-        return competitions
-    except Exception as e:
-        return [{"error": f"Failed to fetch competitions from Devpost: {str(e)}"}]
-
-def fetch_google_competitions(location, age, interests, education_status):
-    """
-    Searches for competitions via Google.
-
-    Args:
-        location (str): User's location.
-        age (str): User's age.
-        interests (str): User's interests.
-        education_status (str): User's education status.
-
-    Returns:
-        list: List of competitions as dictionaries with details.
-    """
-    search_query = f"{interests} competitions OR contests for {education_status} aged {age} in {location} OR online eligibility"
+# Function to fetch competitions from Google
+def fetch_google_competitions(search_query):
     url = f"https://www.google.com/search?q={search_query.replace(' ', '+')}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -79,33 +62,22 @@ def fetch_google_competitions(location, age, interests, education_status):
     except Exception as e:
         return [{"error": f"Failed to fetch competitions from Google: {str(e)}"}]
 
+# Main function to find competitions
 def find_competitions(city, state_province, country, age, interests, education_status):
-    """
-    Aggregates competitions from various sources based on user input.
-
-    Args:
-        city (str): User's city.
-        state_province (str): User's state or province.
-        country (str): User's country.
-        age (str): User's age.
-        interests (str): User's interests.
-        education_status (str): User's education status.
-
-    Returns:
-        list: List of competitions with details.
-    """
     location = f"{city}, {state_province}, {country}"
     all_competitions = []
 
-    # Fetch competitions from Devpost (for coding and tech-related interests)
-    if "coding" in interests.lower() or "hackathon" in interests.lower():
-        all_competitions.extend(fetch_devpost_competitions(interests))
+    # Generate multiple search prompts
+    prompts = generate_search_prompts(interests, education_status, age, location)
 
-    # Fetch competitions from Google
-    all_competitions.extend(fetch_google_competitions(location, age, interests, education_status))
+    # Perform searches for each prompt
+    for prompt in prompts:  
+        results = fetch_google_competitions(prompt)
+        all_competitions.extend(results)
+        time.sleep(random.uniform(1, 3))  # Sleep to mimic natural browsing behavior
 
-    # Filter duplicates by title
-    unique_competitions = {comp["title"]: comp for comp in all_competitions}.values()
+    # Deduplicate competitions by title
+    unique_competitions = {comp["title"]: comp for comp in all_competitions if "title" in comp}.values()
 
     return list(unique_competitions)
 
@@ -115,7 +87,7 @@ if __name__ == "__main__":
     state_province = "Ontario"
     country = "Canada"
     age = "16"
-    interests = "coding"
+    interests = "coding, robotics, entrepreneurship"
     education_status = "High School"
 
     competitions = find_competitions(city, state_province, country, age, interests, education_status)
