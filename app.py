@@ -767,9 +767,9 @@ class ProfileComparator(QWidget):
         }
 
         # Add a skip button for testing
-        skip_button = QPushButton("Skip", self)
-        skip_button.clicked.connect(self.skip_answers)
-        layout.addWidget(skip_button)
+        #skip_button = QPushButton("Skip", self)
+        #skip_button.clicked.connect(self.skip_answers)
+        #layout.addWidget(skip_button)
 
         self.setLayout(layout)
 
@@ -1442,9 +1442,9 @@ class ResumeOptimizer(QWidget):
         }
 
         # Add a skip button for testing
-        skip_button = QPushButton("Skip", self)
-        skip_button.clicked.connect(self.skip_answers)
-        layout.addWidget(skip_button)
+        #skip_button = QPushButton("Skip", self)
+        #skip_button.clicked.connect(self.skip_answers)
+        #layout.addWidget(skip_button)
 
         self.setLayout(layout)
 
