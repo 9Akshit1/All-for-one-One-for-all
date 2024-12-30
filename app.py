@@ -26,6 +26,10 @@ from PyQt6.QtWidgets import (
     QPushButton, QWidget, QFileDialog, QLineEdit, QTextEdit, QComboBox, QScrollArea, QFormLayout, QGridLayout, QStackedLayout, QProgressBar, QStackedWidget, QHBoxLayout, QSpacerItem, QSizePolicy
 )
 
+from sklearn.metrics.pairwise import cosine_similarity
+import spacy
+import numpy as np
+
 from competition_finder.competition_finder import find_competitions
 from resume_optimizer.output import run  
 from application_writer.extract import extract_and_generate 
@@ -516,7 +520,7 @@ class ProfileWidget(QWidget):
             border-radius: 20px;
             padding: 15px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
         """)
         container_layout = QVBoxLayout(container)
         container_layout.setContentsMargins(10, 10, 10, 10)  # Padding inside the container
@@ -528,7 +532,7 @@ class ProfileWidget(QWidget):
         self.school_label = QLabel(f"School: {profile['school']}")
 
         # Style for text (12px font size)
-        text_style = "color: #FED82D; font-size: 12px;"
+        text_style = "color: #FED82D; font-size: 15px;"
         self.rank_label.setStyleSheet(text_style)
         self.score_label.setStyleSheet(text_style)
         self.school_label.setStyleSheet(text_style)
@@ -546,14 +550,14 @@ class ProfileWidget(QWidget):
             border-radius: 5px;
             padding: 5px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 15px;
         """)
         self.expand_button.clicked.connect(self.expand)
         container_layout.addWidget(self.expand_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         # Expanded view content (hidden by default)
         self.details_label = QLabel()
-        self.details_label.setStyleSheet("color: #FED82D; font-size: 12px;")
+        self.details_label.setStyleSheet("color: #FED82D; font-size: 15px; font-weight: bold;")
         self.details_label.setWordWrap(True)
         self.details_label.hide()
 
@@ -565,7 +569,7 @@ class ProfileWidget(QWidget):
             border-radius: 5px;
             padding: 5px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 15px;
         """)
         self.go_back_button.clicked.connect(self.collapse)
         self.go_back_button.hide()
@@ -584,8 +588,8 @@ class ProfileWidget(QWidget):
             self.details_label.setText(
                 f"School: {self.profile['school']}\n"
                 f"Score: {self.score:.2%}\n\n"
-                f"Similar Items:\n{self.similar_items}\n\n"
-                f"Different Items:\n{self.different_items}"
+                f"Similar Items:\n{"\n - ".join(self.similar_items)}\n\n"
+                f"Different Items:\n{"\n - ".join(self.different_items)}"
             )
             self.details_label.show()
             self.expand_button.hide()
@@ -781,10 +785,34 @@ class ProfileComparator(QWidget):
         text = re.sub(r"[\t•-]+", "\n", text)  # Replace newlines, tabs, and bullets with a newline
         return text
 
-    def calculate_similarity(self, user_keywords, dataset_keywords):
+    def midlevel_calculate_similarity(self, user_keywords, dataset_keywords):
         matches = sum(1 for word in user_keywords if word in dataset_keywords)    
         total = len(user_keywords) + len(dataset_keywords)
         return (2 * matches) / total if total > 0 else 0     #weird calcualtion but it works i guess
+
+    def calculate_similarity(self, user_keywords, dataset_keywords):
+        # Check if either list is empty
+        if not user_keywords or not dataset_keywords:
+            return 0.0  # Return 0 similarity if either list is empty
+
+        # Load a lightweight spaCy model
+        nlp = spacy.load('en_core_web_sm')  # You can use "en_core_web_md" for better accuracy
+        
+        # Embed each keyword list into a combined vector
+        def embed_list(keywords):
+            embeddings = [nlp(keyword).vector for keyword in keywords if nlp(keyword).vector.any()]
+            return np.mean(embeddings, axis=0) if embeddings else np.zeros((nlp.vocab.vectors_length,))
+        
+        embedding1 = embed_list(user_keywords)
+        embedding2 = embed_list(dataset_keywords)
+        
+        # Compute cosine similarity
+        similarity = cosine_similarity([embedding1], [embedding2])[0][0]
+        
+        # Scale similarity to range [0, 1] (optional)
+        similarity_scaled = (similarity + 1) / 2
+        
+        return similarity_scaled
 
     def extract_keywords(self, text):
         stop_words = set(stopwords.words("english"))
@@ -821,8 +849,11 @@ class ProfileComparator(QWidget):
 
         return keywords
 
-    def split_experiences(self, text):
-        return re.split(r"\n\n", text.strip())    #seaprates sections when there is a newline
+    def split_experiences(self, text, category):
+        if category in ["work_experience", "projects"]:
+            return re.split(r"\n\n", text.strip())    #seaprates sections when there is a full line space
+        elif category in ["awards", "certifications"]:
+            return re.split(r"\n", text.strip())    #seaprates sections when there is a just a next line
 
     def process_comparison(self, user_original_profile):
         weights = {
@@ -863,14 +894,16 @@ class ProfileComparator(QWidget):
             for category, weight in weights.items():
                 user_text = self.clean_text(user_profile[category])
                 dataset_text = self.clean_text(profile[category])
-                if category in ["work_experience", "projects"]:
-                    user_sections = self.split_experiences(user_text)
-                    dataset_sections = self.split_experiences(dataset_text)
-
+            
+                if category in ["awards", "work_experience", "certifications", "projects"]:
+                    user_sections = self.split_experiences(user_text, category)
+                    dataset_sections = self.split_experiences(dataset_text, category)
                     for user_section in user_sections:
-                        user_keywords[category].append(self.extract_keywords(user_section))
+                        u_section_kw = self.extract_keywords(user_section)
+                        user_keywords[category].append([u_section_kw, user_section])
                     for dataset_section in dataset_sections:
-                        dataset_keywords[category].append(self.extract_keywords(dataset_section))
+                        d_section_kw = self.extract_keywords(dataset_section)
+                        dataset_keywords[category].append([d_section_kw, dataset_section])
                 else:
                     user_keywords[category] = self.extract_keywords(user_profile[category])
                     dataset_keywords[category] = self.extract_keywords(profile[category])
@@ -879,22 +912,40 @@ class ProfileComparator(QWidget):
             similar_items = []
             different_items = []
             for category in user_keywords:
+                print(f"-----------------{category}-----------------")
                 if isinstance(user_keywords[category][0], list):
                     category_scores = []
                     highest_scores = []
-                    for u_section_kw in user_keywords[category]:
-                        for d_section_kw in dataset_keywords[category]:
-                            category_scores.append(self.calculate_similarity(u_section_kw, d_section_kw))    
-                        highest_scores.append(max(category_scores))
-                    avg_score = sum(category_scores) / len(category_scores)
+                    for i in range(0, len(user_keywords[category])):
+                        u_section_kw = user_keywords[category][i][0]
+                        u_section = user_keywords[category][i][1]
+                        print("\nUser section:", u_section)
+                        print("KEYWORDS:", u_section_kw)
+                        for i in range(0, len(dataset_keywords[category])):
+                            d_section_kw = dataset_keywords[category][i][0]
+                            d_section = dataset_keywords[category][i][1]
+                            print("\nDataset section:", d_section)
+                            print("KEYWORDS:", d_section_kw)
+                            similarity = self.calculate_similarity(u_section_kw, d_section_kw)
+                            print("Similarity:", similarity)
+                            category_scores.append(similarity)    
+                        highest_score = max(category_scores)
+                        print("Highest score:", highest_score)
+                        highest_scores.append(highest_score)
+                        if highest_score >= 0.5:
+                            similar_items.append(u_section)
+                        else:
+                            different_items.append(u_section)
+                    avg_score = sum(highest_scores) / len(highest_scores)
+                    print("Average Score:", avg_score)
                     total_score += avg_score * weights[category] if category_scores else 0
                 else:
                     avg_score = self.calculate_similarity(user_keywords[category], dataset_keywords[category])
                     total_score += avg_score * weights[category]
-                if avg_score >= 0.5:
-                        similar_items.append([user_profile[category], profile[category]])
-                else:
-                    different_items.append([user_profile[category], profile[category]])
+                    if avg_score >= 0.5:
+                        similar_items.append(user_profile[category])
+                    else:
+                        different_items.append(user_profile[category])
             results.append((profile, total_score, similar_items, different_items))
 
         # Sort by highest similarity and display results
@@ -1391,9 +1442,9 @@ class ResumeOptimizer(QWidget):
         }
 
         # Add a skip button for testing
-        #skip_button = QPushButton("Skip", self)
-        #skip_button.clicked.connect(self.skip_answers)
-        #layout.addWidget(skip_button)
+        skip_button = QPushButton("Skip", self)
+        skip_button.clicked.connect(self.skip_answers)
+        layout.addWidget(skip_button)
 
         self.setLayout(layout)
 
@@ -1776,7 +1827,7 @@ class ApplicationWriter(QWidget):
             border: none;
             padding: 10px;
             margin: 0;  
-            margin-top: -75px;
+            margin-top: -50px;
             margin-left: 15px;  
             border-radius: 20px 20px 0 0;  
             font-family: 'Arial';
@@ -1803,7 +1854,7 @@ class ApplicationWriter(QWidget):
             question_label.setFixedHeight(35)  # Set the height of the question rectangle
 
             # Create a label for the answer with the appropriate style
-            answer_label = QLabel(f"A: {answer}")
+            answer_label = QLabel(f"{answer}")
             answer_label.setStyleSheet(answer_style)
             answer_label.setWordWrap(True)  # Allow multiline text
             answer_label.setFixedWidth(1160)  # Set the width of the answer rectangle

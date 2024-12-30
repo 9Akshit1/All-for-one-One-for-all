@@ -1,31 +1,61 @@
 [
   {
-    "query": "How does your work experience qualify you for this website developer position",
+    "query": "What are your awards",
     "results": [
       {
-        "text": "r (2023)\n\u25cf\nObotz Olympiad National 1st Rank (2020)\n\u25cf\nGraduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner\n\u25cf\nEarned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates\nVOLUNTEER & WORK EXPERIENCE\nFounder & President, Ottawa ACES Business Chapter\nAugust 2024 - PRESENT\n\u25cf\nIncreased social media presence by regularly up",
+        "text": "eb Development, Data Analytics\n\u25cf\nSoft Skills: Leadership, Time Management, Communication, Debugging, Analytical skills\nAWARDS & ACCOMPLISHMENTS\n\u25cf\nHack 49 Hackathon 3rd Place Winner using Surge Stitch Project (2024)\n\u25cf\nGIA Hacks 2 Hackathon 4th Place Winner using EduPiano Project (2024)\n\u25cf\nOntario Silver Medal for Exemplary Academic Display of Achieving a +90% Average (2024)\n\u25cf\nOttawa Regional Science",
         "source": "user_files/example_resume.pdf",
-        "score": 0.2405923455953598
+        "score": 0.2107182741165161
       },
       {
-        "text": "echnology (95%), Computer Science (100%)\n\u25cf\nMember of the Computer Science Club, Robotics Club, Model UN Club, Chemistry Club\n\u25cf\nChapter President/Creator of the Merivale Business Club (Ottawa ACES Chapter)\nSKILLS\n\u25cf\nMain Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java\n\u25cf\nExperience in AI/ML, Arduino, Game Development, Web Development, Data Analytics\n\u25cf\nSoft Skills: Lead",
+        "text": "AKSHIT MANIKANTA ERUKULLA\nOntario, ON | 613-204-3086 | aksheru09@gmail.com | LinkedIn | Github\nEDUCATION & CERTIFICATIONS\nMerivale High School, Ottawa, ON. - This year: 95% Avg.\nGRADUATING YEAR: 2027\n\u25cf\nPart of the International Baccalaureate (IB) Program. Achieved Honour Roll, Silver Medal.\n\u25cf\nTop subjects include Mathematics (97%), Science (94%), Technology (95%), Computer Science (100%)\n\u25cf\nMember ",
         "source": "user_files/example_resume.pdf",
-        "score": 0.21917037665843964
+        "score": 0.17610040307044983
       },
       {
         "text": "ng a +90% Average (2024)\n\u25cf\nOttawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)\n\u25cf\nFryer UWaterloo Competition National Rank 104 (2024)\n\u25cf\nCanadian Computing Competition Junior Distinction (2024)\n\u25cf\nCanadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)\n\u25cf\nOttawa Regional Science Fair ASHRAE Special Award Winner (2023)\n\u25cf\nObotz Olympiad National 1st Rank (2020)",
         "source": "user_files/example_resume.pdf",
-        "score": 0.2018515169620514
+        "score": 0.13532805442810059
       },
       {
-        "text": " complex algorithms to calculate the most comfortable finger positions of a piano\nmusic song from sheet music. Developed a 2D piano and friendly UI using Pygame.\n\u25cf\nDesigned an IRL projection piano prototype and a posture corrector to teach users step by step.\nExoplanet Habitability Predictor\nFeburary 2024\n\u25cf\nAnalyzed trends & correlations in the NASA Exoplanet Archive using Python Matplotlib librar",
+        "text": "ms\n- PRESENT\n\u25cf\nUtilizes AI and machine learning, including CNNs, for high-accuracy ultrasound data analysis (98%).\n\u25cf\nAnalyzes extensive datasets to recommend optimal treatments for injuries and diseases.\n\u25cf\nFeatures an autonomous medicine pack and micro-seams for precise, localized medication transport.\nSurge Stitch\nOctober 2024\n\u25cf\nCreated a medical stitching robot by utilizing computer vision (Pyth",
         "source": "user_files/example_resume.pdf",
-        "score": 0.1910238265991211
+        "score": 0.11282741278409958
+      },
+      {
+        "text": "r (2023)\n\u25cf\nObotz Olympiad National 1st Rank (2020)\n\u25cf\nGraduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner\n\u25cf\nEarned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates\nVOLUNTEER & WORK EXPERIENCE\nFounder & President, Ottawa ACES Business Chapter\nAugust 2024 - PRESENT\n\u25cf\nIncreased social media presence by regularly up",
+        "source": "user_files/example_resume.pdf",
+        "score": 0.0631127655506134
+      }
+    ]
+  },
+  {
+    "query": "\nHow does your work experience qualify you for this web developer position",
+    "results": [
+      {
+        "text": "echnology (95%), Computer Science (100%)\n\u25cf\nMember of the Computer Science Club, Robotics Club, Model UN Club, Chemistry Club\n\u25cf\nChapter President/Creator of the Merivale Business Club (Ottawa ACES Chapter)\nSKILLS\n\u25cf\nMain Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java\n\u25cf\nExperience in AI/ML, Arduino, Game Development, Web Development, Data Analytics\n\u25cf\nSoft Skills: Lead",
+        "source": "user_files/example_resume.pdf",
+        "score": 0.24241237342357635
+      },
+      {
+        "text": "ng a +90% Average (2024)\n\u25cf\nOttawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)\n\u25cf\nFryer UWaterloo Competition National Rank 104 (2024)\n\u25cf\nCanadian Computing Competition Junior Distinction (2024)\n\u25cf\nCanadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)\n\u25cf\nOttawa Regional Science Fair ASHRAE Special Award Winner (2023)\n\u25cf\nObotz Olympiad National 1st Rank (2020)",
+        "source": "user_files/example_resume.pdf",
+        "score": 0.2299046665430069
+      },
+      {
+        "text": "r (2023)\n\u25cf\nObotz Olympiad National 1st Rank (2020)\n\u25cf\nGraduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner\n\u25cf\nEarned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates\nVOLUNTEER & WORK EXPERIENCE\nFounder & President, Ottawa ACES Business Chapter\nAugust 2024 - PRESENT\n\u25cf\nIncreased social media presence by regularly up",
+        "source": "user_files/example_resume.pdf",
+        "score": 0.216891810297966
       },
       {
         "text": "stitching robot by utilizing computer vision (Python) and Embedded C\n\u25cf\nDeveloped a new stitching method through 3D simulations and CAD modelling\n\u25cf\nGenerated different prototype models and demonstrated a working example to an audience\nTraffic Analyzer & Carjacking Camera\nSeptember 2024\n\u25cf\nUtilized TensorFlow and video framing modules to analyze traffic videos. Identified traffic hotspots, and\nroot c",
         "source": "user_files/example_resume.pdf",
-        "score": 0.1749214082956314
+        "score": 0.1840556561946869
+      },
+      {
+        "text": "\n\u25cf\nIncreased social media presence by regularly updating Instagram and posting. Set up events & lessons.\n\u25cf\nBrought in guest speakers & teachers. Working on bringing sponsors and developing a startup business.\nReference: ACES | advancedcurriculums.official@gmail.com\nWeb developer, Fresh Future Foundation\nAugust 2024 - PRESENT\n\u25cf\nLeveraged React.js, Node.js, HTML, and CSS, to revamp the frontend of o",
+        "source": "user_files/example_resume.pdf",
+        "score": 0.16503454744815826
       }
     ]
   }

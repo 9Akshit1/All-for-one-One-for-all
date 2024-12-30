@@ -1,29 +1,28 @@
-Query: How does your work experience qualify you for this website developer position
-Relevant Snippet (Score: 0.2405923455953598): r (2023)
+Query: What are your awards
+Relevant Snippet (Score: 0.2107182741165161): eb Development, Data Analytics
 ●
-Obotz Olympiad National 1st Rank (2020)
+Soft Skills: Leadership, Time Management, Communication, Debugging, Analytical skills
+AWARDS & ACCOMPLISHMENTS
 ●
-Graduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner
+Hack 49 Hackathon 3rd Place Winner using Surge Stitch Project (2024)
 ●
-Earned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates
-VOLUNTEER & WORK EXPERIENCE
-Founder & President, Ottawa ACES Business Chapter
-August 2024 - PRESENT
+GIA Hacks 2 Hackathon 4th Place Winner using EduPiano Project (2024)
 ●
-Increased social media presence by regularly up
-Relevant Snippet (Score: 0.21917037665843964): echnology (95%), Computer Science (100%)
+Ontario Silver Medal for Exemplary Academic Display of Achieving a +90% Average (2024)
 ●
-Member of the Computer Science Club, Robotics Club, Model UN Club, Chemistry Club
+Ottawa Regional Science
+Relevant Snippet (Score: 0.17610040307044983): AKSHIT MANIKANTA ERUKULLA
+Ontario, ON | 613-204-3086 | aksheru09@gmail.com | LinkedIn | Github
+EDUCATION & CERTIFICATIONS
+Merivale High School, Ottawa, ON. - This year: 95% Avg.
+GRADUATING YEAR: 2027
 ●
-Chapter President/Creator of the Merivale Business Club (Ottawa ACES Chapter)
-SKILLS
+Part of the International Baccalaureate (IB) Program. Achieved Honour Roll, Silver Medal.
 ●
-Main Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java
+Top subjects include Mathematics (97%), Science (94%), Technology (95%), Computer Science (100%)
 ●
-Experience in AI/ML, Arduino, Game Development, Web Development, Data Analytics
-●
-Soft Skills: Lead
-Relevant Snippet (Score: 0.2018515169620514): ng a +90% Average (2024)
+Member 
+Relevant Snippet (Score: 0.13532805442810059): ng a +90% Average (2024)
 ●
 Ottawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)
 ●
@@ -36,15 +35,73 @@ Canadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)
 Ottawa Regional Science Fair ASHRAE Special Award Winner (2023)
 ●
 Obotz Olympiad National 1st Rank (2020)
-Relevant Snippet (Score: 0.1910238265991211):  complex algorithms to calculate the most comfortable finger positions of a piano
-music song from sheet music. Developed a 2D piano and friendly UI using Pygame.
+Relevant Snippet (Score: 0.11282741278409958): ms
+- PRESENT
 ●
-Designed an IRL projection piano prototype and a posture corrector to teach users step by step.
-Exoplanet Habitability Predictor
-Feburary 2024
+Utilizes AI and machine learning, including CNNs, for high-accuracy ultrasound data analysis (98%).
 ●
-Analyzed trends & correlations in the NASA Exoplanet Archive using Python Matplotlib librar
-Relevant Snippet (Score: 0.1749214082956314): stitching robot by utilizing computer vision (Python) and Embedded C
+Analyzes extensive datasets to recommend optimal treatments for injuries and diseases.
+●
+Features an autonomous medicine pack and micro-seams for precise, localized medication transport.
+Surge Stitch
+October 2024
+●
+Created a medical stitching robot by utilizing computer vision (Pyth
+Relevant Snippet (Score: 0.0631127655506134): r (2023)
+●
+Obotz Olympiad National 1st Rank (2020)
+●
+Graduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner
+●
+Earned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates
+VOLUNTEER & WORK EXPERIENCE
+Founder & President, Ottawa ACES Business Chapter
+August 2024 - PRESENT
+●
+Increased social media presence by regularly up
+
+---
+
+Query: 
+How does your work experience qualify you for this web developer position
+Relevant Snippet (Score: 0.24241237342357635): echnology (95%), Computer Science (100%)
+●
+Member of the Computer Science Club, Robotics Club, Model UN Club, Chemistry Club
+●
+Chapter President/Creator of the Merivale Business Club (Ottawa ACES Chapter)
+SKILLS
+●
+Main Coding Languages: Python, Arduino C, HTML, CSS, JS, and currently learning Java
+●
+Experience in AI/ML, Arduino, Game Development, Web Development, Data Analytics
+●
+Soft Skills: Lead
+Relevant Snippet (Score: 0.2299046665430069): ng a +90% Average (2024)
+●
+Ottawa Regional Science Fair Curiosity & Ingenuity Category Winner (2024)
+●
+Fryer UWaterloo Competition National Rank 104 (2024)
+●
+Canadian Computing Competition Junior Distinction (2024)
+●
+Canadian Intermediate Mathematics Canada UWaterloo National Rank 142 (2023)
+●
+Ottawa Regional Science Fair ASHRAE Special Award Winner (2023)
+●
+Obotz Olympiad National 1st Rank (2020)
+Relevant Snippet (Score: 0.216891810297966): r (2023)
+●
+Obotz Olympiad National 1st Rank (2020)
+●
+Graduated all 7 levels of Obotz Barrhaven Robotics with Honour Roll and as Competition Winner
+●
+Earned Drone license; C (Intermediate), Python (Intermediate), JavaScript (Intermediate) certificates
+VOLUNTEER & WORK EXPERIENCE
+Founder & President, Ottawa ACES Business Chapter
+August 2024 - PRESENT
+●
+Increased social media presence by regularly up
+Relevant Snippet (Score: 0.1840556561946869): stitching robot by utilizing computer vision (Python) and Embedded C
 ●
 Developed a new stitching method through 3D simulations and CAD modelling
 ●
@@ -54,6 +111,16 @@ September 2024
 ●
 Utilized TensorFlow and video framing modules to analyze traffic videos. Identified traffic hotspots, and
 root c
+Relevant Snippet (Score: 0.16503454744815826): 
+●
+Increased social media presence by regularly updating Instagram and posting. Set up events & lessons.
+●
+Brought in guest speakers & teachers. Working on bringing sponsors and developing a startup business.
+Reference: ACES | advancedcurriculums.official@gmail.com
+Web developer, Fresh Future Foundation
+August 2024 - PRESENT
+●
+Leveraged React.js, Node.js, HTML, and CSS, to revamp the frontend of o
 
 ---
 
